@@ -9,7 +9,10 @@ import (
 	"net/http"
 	"net/smtp"
 	"os"
+	"regexp"
 )
+
+var emailRegex string = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
 
 type Mail struct {
 	Contact string `json:"Contact"`
@@ -47,6 +50,13 @@ func sendMailRoute(w http.ResponseWriter, r *http.Request) {
 }
 
 func sendMail(mail Mail) (string, int) {
+	if valid := checkEmptyString(mail); !valid {
+		return "Empty string are not allowed", 400
+	}
+	if valid := checkEmailFormat(mail.Contact); !valid {
+		return "Invalid email address", 400
+	}
+
 	auth := smtp.PlainAuth("", os.Getenv("MAIL_USERNAME"), os.Getenv("MAIL_PASSWORD"), os.Getenv("MAIL_SERVER"))
 
 	to := []string{os.Getenv("MAIL_TO")}
@@ -60,6 +70,18 @@ func sendMail(mail Mail) (string, int) {
 		return "Something went wrong when sending the mail", 500
 	}
 	return "Success", 200
+}
+
+func checkEmptyString(mail Mail) bool {
+	if mail.Contact == "" || mail.Subject == "" || mail.Body == "" {
+		return false
+	}
+	return true
+}
+
+func checkEmailFormat(email string) bool {
+	re := regexp.MustCompile(emailRegex)
+	return re.MatchString(email)
 }
 
 func handleRequests() {
