@@ -18,6 +18,9 @@ jobs:
 
     - name: Build
       run: go build -v ./...
+      
+    - name: Env file setup
+      run: touch .env
 
     - name: Test
       run: go test -v ./...
