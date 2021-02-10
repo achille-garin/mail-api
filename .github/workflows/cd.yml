@@ -1,0 +1,29 @@
+name: CD
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.15
+
+    - name: Build
+      run: go build -v ./...
+      
+    - name: Deploy
+      uses: appleboy/scp-action@v0.1.1
+      with:
+        host: four.garin.xyz
+        username: pi
+        key: ${{ secrets.DEPLOY_SSH_KEY }}
+        source: "mail-api"
+        target: "/opt/golang-api/"
