@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/smtp"
 	"os"
+	"path"
 	"regexp"
 )
 
@@ -21,16 +22,24 @@ type Mail struct {
 }
 
 func init() {
-	err := godotenv.Load()
+	ex, err := os.Executable()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Fatal(err)
+	}
+	dir := path.Dir(ex)
+	err = godotenv.Load(dir + "/.env")
+	if err != nil {
+		err = godotenv.Load()
+		if err != nil {
+			log.Fatal("Error loading .env file")
+		}
 	}
 }
 
 func sendMailRoute(w http.ResponseWriter, r *http.Request) {
-
 	resp := make(map[string]string)
-	w.Header().Set("content-type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "achille.garin.xyz:443")
 
 	if r.Method == "POST" {
 		reqBody, _ := ioutil.ReadAll(r.Body)
@@ -46,6 +55,7 @@ func sendMailRoute(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
 	}
 
+	log.Print(fmt.Sprintf("Request proccessing, return message : %q", resp["message"]))
 	json.NewEncoder(w).Encode(resp)
 }
 
@@ -90,5 +100,6 @@ func handleRequests() {
 }
 
 func main() {
+	log.Print("Server is running")
 	handleRequests()
 }
