@@ -3,14 +3,15 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/go-gomail/gomail"
 	"github.com/joho/godotenv"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/smtp"
 	"os"
 	"path"
 	"regexp"
+	"strconv"
 )
 
 var emailRegex string = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
@@ -67,16 +68,17 @@ func sendMail(mail Mail) (string, int) {
 		return "Invalid email address", 400
 	}
 
-	auth := smtp.PlainAuth("", os.Getenv("MAIL_USERNAME"), os.Getenv("MAIL_PASSWORD"), os.Getenv("MAIL_SERVER"))
+	m := gomail.NewMessage()
+	m.SetHeader("From", os.Getenv("MAIL_TO"))
+	m.SetHeader("To", os.Getenv("MAIL_TO"))
+	m.SetHeader("Subject", "Contact from website -> "+mail.Subject)
+	m.SetBody("text/plain", "Email : "+mail.Contact+"\r\n"+mail.Body)
 
-	to := []string{os.Getenv("MAIL_TO")}
-	msg := []byte("To: " + os.Getenv("MAIL_TO") + "\r\n" +
-		"From: " + mail.Contact + "\r\n" +
-		"Subject: Contact from website -> " + mail.Subject + "\r\n" +
-		"\r\n" +
-		mail.Body + "\r\n")
-	err := smtp.SendMail(os.Getenv("MAIL_SERVER")+":"+os.Getenv("MAIL_PORT"), auth, mail.Contact, to, msg)
-	if err != nil {
+	port, _ := strconv.Atoi(os.Getenv("MAIL_PORT"))
+
+	d := gomail.NewDialer(os.Getenv("MAIL_SERVER"), port, os.Getenv("MAIL_USERNAME"), os.Getenv("MAIL_PASSWORD"))
+
+	if err := d.DialAndSend(m); err != nil {
 		return "Something went wrong when sending the mail", 500
 	}
 	return "Success", 200
