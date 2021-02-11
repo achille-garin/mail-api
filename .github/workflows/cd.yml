@@ -16,9 +16,6 @@ jobs:
 
     - name: Build
       run: go build -v ./...
-      
-    - name: Dump ssh key
-      run: echo "${{ secrets.DEPLOY_SSH_KEY }}" > key
         
     - name: Deploy
-      run: scp -i ./key ./mail-api pi@four.garin.xyz:/opt/golang-api/
+      run: scp -i ${{ secrets.DEPLOY_SSH_KEY }} ./mail-api pi@four.garin.xyz:/opt/golang-api/
