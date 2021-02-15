@@ -42,6 +42,7 @@ func sendMailRoute(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "https://achille.garin.xyz")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
 	if r.Method == "POST" {
 		reqBody, _ := ioutil.ReadAll(r.Body)
