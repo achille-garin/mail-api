@@ -41,6 +41,7 @@ func sendMailRoute(w http.ResponseWriter, r *http.Request) {
 	resp := make(map[string]string)
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "https://achille.garin.xyz")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 
 	if r.Method == "POST" {
 		reqBody, _ := ioutil.ReadAll(r.Body)
@@ -50,6 +51,9 @@ func sendMailRoute(w http.ResponseWriter, r *http.Request) {
 		message, code := sendMail(mail)
 		resp["message"] = message
 		w.WriteHeader(code)
+
+	} else if r.Method == "OPTIONS" {
+		return
 
 	} else {
 		resp["message"] = fmt.Sprintf("This URL does not accept %q requests", r.Method)
