@@ -98,7 +98,12 @@ func checkEmailFormat(email string) bool {
 
 func handleRequests() {
 	http.HandleFunc("/", sendMailRoute)
-	log.Fatal(http.ListenAndServe(":8000", nil))
+	_, err := os.Stat("/etc/letsencrypt/live/achille.garin.xyz/fullchain.pem")
+	if os.IsNotExist(err) {
+		log.Fatal(http.ListenAndServe(":8000", nil))
+	} else {
+		log.Fatal(http.ListenAndServeTLS(":8000", "/etc/letsencrypt/live/achille.garin.xyz/fullchain.pem", "/etc/letsencrypt/live/achille.garin.xyz/privkey.pem", nil))
+	}
 }
 
 func main() {
