@@ -40,7 +40,7 @@ func init() {
 func sendMailRoute(w http.ResponseWriter, r *http.Request) {
 	resp := make(map[string]string)
 	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "achille.garin.xyz:443")
+	w.Header().Set("Access-Control-Allow-Origin", "https://achille.garin.xyz")
 
 	if r.Method == "POST" {
 		reqBody, _ := ioutil.ReadAll(r.Body)
